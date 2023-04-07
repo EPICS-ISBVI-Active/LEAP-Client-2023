@@ -3,6 +3,7 @@
 #include <wiringPi.h>
 #include <fstream>
 #include <bitset>
+#include <sstream>
 
 using namespace std;
 
@@ -11,10 +12,19 @@ class Braille {
 
     private:
         // A private boolean array containing the state of each Braille dot
-        bool dots[6] = {false, false, false, false, false, false};
+        bool dots[6] = {false};
 
     public:
-        Braille() {};
+        Braille() {
+
+        };
+
+        // Resets the state of each dot to false
+        void clear() {
+
+            // Re-allocates each value to 0 using an assembly reference for maximum optimization
+            memset(dots, 0, sizeof(dots));
+        }
 
         // This sets the state of a dot to true, 
         void setDot(int index) {
@@ -22,7 +32,7 @@ class Braille {
         };
 
         // Converts the Braille character object to a "wide" character for use with the translation library and file output
-        wchar_t toChar(bool dots[6]) {
+        wchar_t toChar() {
 
             // Creates the base value '00000000' byte to do operations on
             uint8_t brailleCode = 0;
@@ -40,13 +50,17 @@ class Braille {
 };
 
 // Currently encapsulates all GPIO pins that are accessable as inputs for debugging reasons
+// These pins are board numbers, not BCM
 const int GPIO_PINS[] = {7, 11, 12, 13, 15, 16, 18, 22, 29, 31, 32, 33, 35, 36, 37, 38, 40};
+
+// The key value pairs to convert from the pin id to the dot id
+unordered_map<int, int> dotPins;
 
 // The number of pins contained in the GPIO_PINS array
 const int numPins = sizeof(GPIO_PINS)/sizeof(int);
 
 // The current storage of braille characters to be sent to the translation library
-stringstream line();
+wstringstream line;
 
 // The destination file for the text data to be sent to
 wofstream outfile("output.txt");
@@ -56,33 +70,88 @@ wofstream outfile("output.txt");
 // as the space key descends when any dot is pressed
 bitset<numPins> pinState;
 
+// The braille character in object form
+Braille currChar;
+
 // Responsible for handling the action to take when a pin is activated
 void hallEffectTriggered(int pin)
 {
-    // TODO:
-    // Add hall effect handling
+
     cout << "Pin " << pin << " was pressed" << endl;
+
+    switch (pin) {
+        // Button Pressed
+        case 35:
+            // TODO add logic for determining if the action to take is
+            // switching the translation language or creating a new page
+            break;
+
+        // Advance Pressed
+        case 32:
+            // Adds the current braille character to the output line
+            line.put(currChar.toChar());
+            currChar = Braille();
+            break;
+
+        // Space
+        case 23:
+
+            //make sure the following is only executed if there are no other keys pressed while pressing space
+            if (pinState.none()) {
+                line << " ";
+            }
+            break;
+
+        // Backspace
+        case 36:
+            break;
+        
+        default:
+            // Sets the pinstate of the dot that corresponds with the activated pin as active
+            // **This is necessary to filter out space key presses**
+            pinState[dotPins[pin]] = 1;
+            currChar.setDot(dotPins[pin]);
+
+    }
+
 }
 
 // Responsible for clearing the bit containing 
 void hallEffectDisabled(int pin)
 {
-    // TODO:
-    // Add hall effect handling
     cout << "Pin " << pin << " was released" << endl;
+    
+    // Exits the method if the pressed pin was not a dot key
+    if (dotPins.find(pin) == dotPins.end()) {
+        return;
+    }
+
+    // Sets the hall effect sensor state to disabled
+    // Only occurs for the dot hall effects
+    pinState[dotPins[pin]] = 0;
 }
 
 int main()
 {
     // Initializes the library   
     wiringPiSetup();
+    
+    // Set up key-value pairs for the dot pin unordered map (hashmap or dictionary equivalent in c++)
+    dotPins[22] = 2;    // Dot 3
+    dotPins[21] = 1;    // Dot 2
+    dotPins[24] = 0;    // Dot 1
+
+    dotPins[26] = 3;    // Dot 4
+    dotPins[38] = 4;    // Dot 5
+    dotPins[00000] = 5; // Dot 6 Pin not working, need to fix and review documentation for correct pin
+
 
     // An array of functions that will be passed individually to each interrupt routine
     function<void()> isr_rising[numPins];
     function<void()> isr_falling[numPins];
     
     // Loops through all pins to set their respective properties
-    for (int i = 0; i < sizeof(GPIO_PINS)/sizeof(*GPIO_PINS); i++) {
+    for (int i = 0; i < numPins; i++) {
 
         // Creates an array of function pointers to store the dynamically generated function calls, passing in the pin number
         isr_rising[i] = [pin = GPIO_PINS[i]]() { hallEffectTriggered(pin); };
@@ -97,7 +166,11 @@ int main()
     }
 
     // Keeps the program running so that the interrupts function properly
-    while (true) {}
+    while (true) {
+        // TODO:
+        // Add logic to determine the active line via the scroll knob and append a newline character to the previous active line
+
+    }
 
     return 0;
 }
