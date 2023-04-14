@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# Set the file path to the build command in WiringPi
+BUILD_COMMAND="lib/WiringPi-2.61-1/WiringPi-2.61-1/build"
+
+# Set the file path to the main.cpp file
+MAIN_FILE="src/main.cpp"
+
+# Change the permissions of the build command to 770
+chmod 770 "$BUILD_COMMAND"
+
+# Execute the build command
+"$BUILD_COMMAND"
+
+# Build the main.cpp file referencing the wiringpi library
+g++ "$MAIN_FILE" -o main -lwiringpi
