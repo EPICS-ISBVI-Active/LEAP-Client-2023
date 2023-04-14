@@ -7,6 +7,11 @@
 
 using namespace std;
 
+#define BUTTON 35
+#define ADVANCE 32
+#define SPACE 23
+#define BACKSPACE 36
+
 // A class to store braille characters in an effort to handle better in the translation stage
 class Braille {
 
@@ -57,7 +62,7 @@ const int GPIO_PINS[] = {7, 11, 12, 13, 15, 16, 18, 22, 29, 31, 32, 33, 35, 36, 
 unordered_map<int, int> dotPins;
 
 // The number of pins contained in the GPIO_PINS array
-const int numPins = sizeof(GPIO_PINS)/sizeof(int);
+const int numPins = sizeof(GPIO_PINS) / sizeof(int);
 
 // The current storage of braille characters to be sent to the translation library
 wstringstream line;
@@ -81,20 +86,23 @@ void hallEffectTriggered(int pin)
 
     switch (pin) {
         // Button Pressed
-        case 35:
+        case BUTTON:
             // TODO add logic for determining if the action to take is
             // switching the translation language or creating a new page
             break;
 
         // Advance Pressed
-        case 32:
+        case ADVANCE:
             // Adds the current braille character to the output line
             line.put(currChar.toChar());
-            currChar = Braille();
+
+            // Puts the character to the console, only works if the console supports braille characters
+            wcout << currChar.toChar();
+            currChar.clear();
             break;
 
         // Space
-        case 23:
+        case SPACE:
 
             //make sure the following is only executed if there are no other keys pressed while pressing space
             if (pinState.none()) {
@@ -103,7 +111,7 @@ void hallEffectTriggered(int pin)
             break;
 
         // Backspace
-        case 36:
+        case BACKSPACE:
             break;
         
         default:
@@ -169,7 +177,6 @@ int main()
     while (true) {
         // TODO:
         // Add logic to determine the active line via the scroll knob and append a newline character to the previous active line
-
     }
 
     return 0;
