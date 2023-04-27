@@ -10,6 +10,7 @@
 #include <bitset>
 #include <sstream>
 #include <cstring>
+#include <unordered_map>
 
 using namespace std;
 
