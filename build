@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Author: Nathan Fassnacht
+# Contact: foz@fozfuncs.com
+
 # Set the file path to the build command in WiringPi
 BUILD_COMMAND="lib/WiringPi-2.61-1/WiringPi-2.61-1/build"
 
