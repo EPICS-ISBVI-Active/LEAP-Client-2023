@@ -16,4 +16,4 @@ chmod 770 "$BUILD_COMMAND"
 "$BUILD_COMMAND"
 
 # Build the main.cpp file referencing the wiringpi library
-g++ "$MAIN_FILE" -o main -lwiringpi -std=c++14
+g++ "$MAIN_FILE" -o main -L./lib/WiringPi-2.61-1/WiringPi-2.61-1/wiringPi -lwiringPi -std=c++14
