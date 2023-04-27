@@ -9,7 +9,7 @@
 #include <fstream>
 #include <bitset>
 #include <sstream>
-#include <cstringt.h>
+#include <cstring>
 
 using namespace std;
 
@@ -164,6 +164,7 @@ void hallEffectDisabled(int pin)
 
 int main()
 {
+    dotPins.reserve(6);
     // Initializes the library   
     wiringPiSetup();
     
