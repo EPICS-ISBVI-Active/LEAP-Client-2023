@@ -199,6 +199,7 @@ int main()
         // It is not super optimized, as the switch case is 2 times per activation and may be better to change in the actual implementation
         cout << i << endl;
         cout << "isr_falling[" << i << "] = " << (void*)isr_falling[i].target<void (*)()>() << endl; // add this line
+        cout << GPIO_PINS[i] << endl;
         wiringPiISR(GPIO_PINS[i], INT_EDGE_BOTH, *isr_rising[i].target<void (*)()>());
 
         // Only sets the interrupt on the dot pins so that an additional if statement can be avoided every execution
