@@ -197,6 +197,7 @@ int main()
         // This is done by creating an array of functions, passing each a different pin
         // and then passing a pointer to the function to the ISR so that a new function doesn't need to be created for each pin.
         // It is not super optimized, as the switch case is 2 times per activation and may be better to change in the actual implementation
+        cout << i << "\n";
         wiringPiISR(GPIO_PINS[i], INT_EDGE_BOTH, *isr_rising[i].target<void (*)()>());
 
         // Only sets the interrupt on the dot pins so that an additional if statement can be avoided every execution
