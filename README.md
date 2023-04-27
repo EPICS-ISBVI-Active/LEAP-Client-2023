@@ -5,6 +5,21 @@ The C++ program interfaces with the Perkins Brailler, using a custom electronics
 
 The JavaScript server receives the digital representation of the braille document, and converts it into a format that can be displayed on a website. This allows teachers who work with visually impaired students to easily view and provide feedback on the student's work.
 
+## Installation
+
+1. Install the gh package on the raspberry pi following the tutorial linked [here](https://github.com/cli/cli/blob/trunk/docs/install_linux.md)
+
+2. Clone the repository to pi locally through the 'gh repo clone EPICS-ISBVI-Active/LEAP-Client-2023' command 
+
+3. Install the 'build-essentials' package
+
+4. navigate to the repository on the raspberry pi
+
+5. change the file permissions on the build file in the WiringPi build file
+
+5. run ```sudo .../TestCode2023V2/LEAP-Client-2023/lib/WiringPi-2.61-1/WiringPi-2.61-1/build```
+
+
 ## Usage
 LEAP Client is designed to be used by teachers who are working with visually impaired students. The teacher should have a device that is connected to the same network as the Raspberry Pi Zero W, and should navigate to the server's URL in their web browser.
 
