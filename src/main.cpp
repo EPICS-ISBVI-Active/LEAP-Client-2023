@@ -188,7 +188,7 @@ int main()
 
         // Creates an array of function pointers to store the dynamically generated function calls, passing in the pin number
         isr_rising[i] = [pin = GPIO_PINS[i]]() { hallEffectTriggered(pin); };
-        isr_rising[i] = [pin = GPIO_PINS[i]]() { hallEffectDisabled(pin); };
+        isr_falling[i] = [pin = GPIO_PINS[i]]() { hallEffectDisabled(pin); };
 
         // Sets every pin as an input pin
         pinMode(GPIO_PINS[i], INPUT);
