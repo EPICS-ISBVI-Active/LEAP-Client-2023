@@ -1,9 +1,15 @@
+/**
+ * @author Nathan Fassnacht
+ * Contact: foz@fozfuncs.com
+*/
+
 #include <iostream>
 #include <functional>
 #include <wiringPi.h>
 #include <fstream>
 #include <bitset>
 #include <sstream>
+#include <cstringt.h>
 
 using namespace std;
 
@@ -91,6 +97,24 @@ void hallEffectTriggered(int pin)
             // switching the translation language or creating a new page
             break;
 
+        // Space
+        case SPACE:
+
+            // make sure the following is only executed if there are no other keys pressed while pressing space
+            // outputs the current braille character
+            if (pinState.none()) {
+
+                // Adds the current braille character to the output line
+                line.put(currChar.toChar());
+
+                // Puts the character to the console, only works if the console supports braille characters
+                wcout << currChar.toChar();
+                currChar.clear();
+
+                // Adds a space to the line
+                line << L" ";
+            }
+
         // Advance Pressed
         case ADVANCE:
             // Adds the current braille character to the output line
@@ -101,17 +125,16 @@ void hallEffectTriggered(int pin)
             currChar.clear();
             break;
 
-        // Space
-        case SPACE:
-
-            //make sure the following is only executed if there are no other keys pressed while pressing space
-            if (pinState.none()) {
-                line << " ";
-            }
-            break;
-
         // Backspace
         case BACKSPACE:
+            // If the character count of the wstringbuffer is zero, we cancel the action
+            if (line.gcount() == 0) {
+                break;
+            }
+
+            // Possible solution?
+            // This line of code moves the current writing index back by one so the next character written will overwrite it
+            line.seekp(-1, line.cur);
             break;
         
         default:
@@ -119,7 +142,7 @@ void hallEffectTriggered(int pin)
             // **This is necessary to filter out space key presses**
             pinState[dotPins[pin]] = 1;
             currChar.setDot(dotPins[pin]);
-
+            break;
     }
 
 }
@@ -151,7 +174,7 @@ int main()
 
     dotPins[26] = 3;    // Dot 4
     dotPins[38] = 4;    // Dot 5
-    dotPins[00000] = 5; // Dot 6 Pin not working, need to fix and review documentation for correct pin
+    dotPins[40] = 5; // Dot 6 Pin not working, need to fix and review documentation for correct pin
 
 
     // An array of functions that will be passed individually to each interrupt routine
@@ -169,8 +192,15 @@ int main()
         pinMode(GPIO_PINS[i], INPUT);
 
         // Assosciates the pin changing states with calling hallEffectTriggered
+        // This is done by creating an array of functions, passing each a different pin
+        // and then passing a pointer to the function to the ISR so that a new function doesn't need to be created for each pin.
+        // It is not super optimized, as the switch case is 2 times per activation and may be better to change in the actual implementation
         wiringPiISR(GPIO_PINS[i], INT_EDGE_BOTH, *isr_rising[i].target<void (*)()>());
-        wiringPiISR(GPIO_PINS[i], INT_EDGE_FALLING, *isr_falling[i].target<void (*)()>());
+
+        // Only sets the interrupt on the dot pins so that an additional if statement can be avoided every execution
+        if (dotPins.find(GPIO_PINS[i]) != dotPins.end()) {
+            wiringPiISR(GPIO_PINS[i], INT_EDGE_FALLING, *isr_falling[i].target<void (*)()>());
+        }
     }
 
     // Keeps the program running so that the interrupts function properly
